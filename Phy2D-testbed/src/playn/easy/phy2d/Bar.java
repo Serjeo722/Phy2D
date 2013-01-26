@@ -2,6 +2,7 @@ package playn.easy.phy2d;
 
 public class Bar {
 
+	/*
 	public double x;
 	public double y;
 	public double width;
@@ -10,9 +11,6 @@ public class Bar {
 	public double vx;
 	public double vy;
 	
-	public enum Type {
-		STATIC, DYNAMIC;
-	}
 	
 	public Bar(double x,double y,double width,double height, Type type){
 		this.x = x;
@@ -84,5 +82,5 @@ public class Bar {
 	public Object getUserData(){
 		return o;
 	}
-
+*/
 }

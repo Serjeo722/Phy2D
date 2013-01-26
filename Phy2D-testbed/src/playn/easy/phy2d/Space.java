@@ -3,56 +3,260 @@ package playn.easy.phy2d;
 import java.util.ArrayList;
 
 public class Space {
-	
-	private ArrayList<Bar> dynamicBars = new ArrayList<Bar>();
-	private ArrayList<Bar> staticBars = new ArrayList<Bar>();
-	private ArrayList<Bar> deleted = new ArrayList<Bar>();
+
+	public enum BarType {
+		STATIC, DYNAMIC, RED;
+	}
+
+	private ArrayList<DynamicBar> dynamicBars = new ArrayList<DynamicBar>();
+	private ArrayList<StaticBar> staticBars = new ArrayList<StaticBar>();
 	
 	public void step(double delta){
 
-		for(Bar bar:dynamicBars){
-			bar.x+=bar.vx;
-			bar.y+=bar.vy;
+		for(DynamicBar b:dynamicBars){
+
+			boolean collided = false;
+			
+			// top, right
+			if ((b.vy > 0) && (b.vx > 0)) {
+				double new_x=0;
+				double new_y=0;
+				
+				double x_min = b.x + b.w + b.vx;
+				double y_min = b.y + b.h + b.vy;
+				double path_min=b.path();
+
+				boolean horizontal_flip = false;
+				boolean vertical_flip = false;				
+				
+				for (StaticBar bar : staticBars) {
+					
+					// top
+					double x = b.x + (bar.bottom - b.y - b.h) * b.vx / b.vy;
+					if (!((bar.right < x - b.w) || (bar.left > x + b.w))) {
+						if ((b.y + b.h < bar.bottom) && (b.pathY(bar.bottom-b.y-b.h) < path_min)) {
+							y_min = bar.bottom;
+							path_min=b.pathY(bar.bottom-b.y-b.h);
+							new_y = y_min - b.h;
+							new_x = x;
+							horizontal_flip = true;
+							vertical_flip = false;
+						}
+					}
+					
+					// right
+					double y = b.y + (bar.left - b.x - b.w) * b.vy / b.vx;
+					if (!((bar.top < y - b.h) || (bar.bottom > y + b.h))) {
+						if ((b.x + b.w < bar.left) && (b.pathX(bar.left-b.x-b.w) < path_min)) {
+							x_min = bar.left;
+							path_min=b.pathX(bar.left-b.x-b.w);
+							new_x = x_min - b.w;
+							new_y = y;
+							horizontal_flip = false;
+							vertical_flip = true;
+						}
+					}
+				}
+				if ((new_x != 0) || (new_y != 0)) {
+					b.x = new_x;
+					b.y = new_y;
+					if (horizontal_flip) b.collide(b.vx, -b.vy);
+					if (vertical_flip) b.collide(-b.vx, b.vy);
+					collided = horizontal_flip || vertical_flip;
+				}
+			}
+
+			//bottom, left
+			if ((b.vy < 0) && (b.vx < 0)) {
+				double new_x=0;
+				double new_y=0;
+				
+				double y_max = b.y - b.h + b.vy;
+				double x_max = b.x - b.w + b.vx;
+				double path_min=b.path();
+
+				boolean horizontal_flip = false;
+				boolean vertical_flip = false;				
+
+				for (StaticBar bar : staticBars) {
+
+					// bottom
+					double x = b.x - (b.y - b.h-bar.top) * b.vx / b.vy;
+					if (!((bar.right < x - b.w) || (bar.left > x + b.w))) {
+						if ((b.y - b.h > bar.top) && (b.pathY(b.y - b.h-bar.top) < path_min)) {
+							y_max = bar.top;
+							path_min=b.pathY(b.y - b.h-bar.top);
+							new_y = y_max + b.h;
+							new_x = x;
+							horizontal_flip = true;
+							vertical_flip = false;
+						}
+					}
+					
+					// left
+					double y = b.y - (b.x - b.w-bar.right) * b.vy / b.vx;
+					if (!((bar.top < y - b.h) || (bar.bottom > y + b.h))) {
+						if ((b.x - b.w > bar.right) && (b.pathX(b.x-b.w-bar.right) < path_min)) {
+							x_max = bar.right;
+							path_min=b.pathX(b.x-b.w-bar.right);
+							new_x = x_max + b.w;
+							new_y = y;
+							horizontal_flip = false;
+							vertical_flip = true;
+						}
+					}
+
+				}
+				if ((new_x != 0) || (new_y != 0)) {
+					b.x = new_x;
+					b.y = new_y;
+					if (horizontal_flip) b.collide(b.vx, -b.vy);
+					if (vertical_flip) b.collide(-b.vx, b.vy);
+					collided = horizontal_flip || vertical_flip;
+				}
+			}
+
+			
+			// top, left
+			if ((b.vy > 0) && (b.vx < 0)) {
+				double new_x=0;
+				double new_y=0;
+				
+				double x_max = b.x - b.w + b.vx;
+				double y_min = b.y + b.h + b.vy;
+				double path_min=b.path();
+				
+				boolean horizontal_flip = false;
+				boolean vertical_flip = false;				
+				
+				for (StaticBar bar : staticBars) {
+					double x = b.x + (bar.bottom - b.y - b.h) * b.vx / b.vy;
+					
+					// top
+					if (!((bar.right < x - b.w) || (bar.left > x + b.w))) {
+						if ((b.y + b.h < bar.bottom) && (b.pathY(bar.bottom-b.y-b.h) < path_min)) {
+							y_min = bar.bottom;
+							path_min=b.pathY(bar.bottom-b.y-b.h);
+							new_y = y_min - b.h;
+							new_x = x;
+							horizontal_flip = true;
+							vertical_flip = false;
+						}
+					}
+					
+					// left
+					double y = b.y - (b.x - b.w-bar.right) * b.vy / b.vx;
+					if (!((bar.top < y - b.h) || (bar.bottom > y + b.h))) {
+						if ((b.x - b.w > bar.right) && (b.pathX(b.x-b.w-bar.right) < path_min)) {
+							x_max = bar.right;
+							path_min=b.pathX(b.x-b.w-bar.right);
+							new_x = x_max + b.w;
+							new_y = y;
+							horizontal_flip = false;
+							vertical_flip = true;
+						}
+					}
+				}
+				if ((new_x != 0) || (new_y != 0)) {
+					b.x = new_x;
+					b.y = new_y;
+					if (horizontal_flip) b.collide(b.vx, -b.vy);
+					if (vertical_flip) b.collide(-b.vx, b.vy);
+					collided = horizontal_flip || vertical_flip;
+				}
+			}
+
+			
+			//bottom, right
+			if ((b.vy < 0) && (b.vx > 0)) {
+				double new_x=0;
+				double new_y=0;
+				
+				double y_max = b.y - b.h + b.vy;
+				double x_min = b.x + b.w + b.vx;
+				double path_min=b.path();
+
+				boolean horizontal_flip = false;
+				boolean vertical_flip = false;				
+
+				for (StaticBar bar : staticBars) {
+
+					// bottom
+					double x = b.x - (b.y - b.h-bar.top) * b.vx / b.vy;
+					if (!((bar.right < x - b.w) || (bar.left > x + b.w))) {
+						if ((b.y - b.h > bar.top) && (b.pathY(b.y - b.h-bar.top) < path_min)) {
+							y_max = bar.top;
+							path_min=b.pathY(b.y - b.h-bar.top);
+							new_y = y_max + b.h;
+							new_x = x;
+							horizontal_flip = true;
+							vertical_flip = false;
+						}
+					}
+					
+					// right
+					double y = b.y + (bar.left - b.x - b.w) * b.vy / b.vx;
+					if (!((bar.top < y - b.h) || (bar.bottom > y + b.h))) {
+						if ((b.x + b.w < bar.left) && (b.pathX(bar.left-b.x-b.w) < path_min)) {
+							x_min = bar.left;
+							path_min=b.pathX(bar.left-b.x-b.w);
+							new_x = x_min - b.w;
+							new_y = y;
+							horizontal_flip = false;
+							vertical_flip = true;
+						}
+					}
+				}
+				if ((new_x != 0) || (new_y != 0)) {
+					b.x = new_x;
+					b.y = new_y;
+					if (horizontal_flip) b.collide(b.vx, -b.vy);
+					if (vertical_flip) b.collide(-b.vx, b.vy);
+					collided = horizontal_flip || vertical_flip;
+				}
+			}
+			
+			if(!collided){
+				b.x += b.vx;
+				b.y += b.vy;
+			}
 		}
 		
-		for(Bar del:deleted){
-			if(del.type==Bar.Type.DYNAMIC) dynamicBars.remove(del);
-			if(del.type==Bar.Type.STATIC) staticBars.remove(del);
-		} 
+		
 	}
 	
-	public void add(Bar bar){
-		if(bar.type==Bar.Type.DYNAMIC) dynamicBars.add(bar);
-		if(bar.type==Bar.Type.STATIC) staticBars.add(bar);
-		
+	public void add(StaticBar bar){
+		staticBars.add(bar);
 	}
 
-	public void delete(Bar bar){
-		deleted.add(bar);
+	public void add(DynamicBar bar){
+		dynamicBars.add(bar);
 	}
 
-	public boolean cross(Bar b){
+	
+	public boolean cross(DynamicBar b){
 		boolean cross = false;
-		double left = b.x - b.width / 2;
-		double right = b.x + b.width / 2;
-		double top = b.y + b.height / 2;
-		double bottom = b.y - b.height / 2;
 		
-		for (Bar bar : dynamicBars)
-			cross = cross || bar.isPointInside(left, top)
-					|| bar.isPointInside(left, bottom)
-					|| bar.isPointInside(right, top)
-					|| bar.isPointInside(right, bottom);
-		for (Bar bar : staticBars)
-			cross = cross || bar.isPointInside(left, top)
-					|| bar.isPointInside(left, bottom)
-					|| bar.isPointInside(right, top)
-					|| bar.isPointInside(right, bottom);
+		for (StaticBar bar : staticBars)
+			cross = cross || bar.isPointInside(b.x-b.w, b.y-b.h)
+					|| bar.isPointInside(b.x+b.w, b.y-b.h)
+					|| bar.isPointInside(b.x-b.w, b.y+b.h)
+					|| bar.isPointInside(b.x+b.w, b.y+b.h);
 		return cross;
 	}
 	
 	public void render(DebugRenderer render){
-		for(Bar bar:dynamicBars) bar.render(render);
+		for(DynamicBar bar:dynamicBars) bar.render(render);
+
+		for(StaticBar bar:staticBars){
+			render.line(bar.left, bar.top, bar.right, bar.top, BarType.STATIC);
+			render.line(bar.left, bar.bottom, bar.right, bar.bottom, BarType.STATIC);
+			render.line(bar.left, bar.top, bar.left, bar.bottom, BarType.STATIC);
+			render.line(bar.right, bar.top, bar.right, bar.bottom, BarType.STATIC);
+		}
+		
+		
+		/*
 		for(Bar bar:staticBars){
 			
 			Bar.Type type1 = Bar.Type.STATIC;
@@ -76,7 +280,7 @@ public class Space {
 			render.line(L, B, R, B, type2);
 			render.line(L, T, L, B, type3);
 			render.line(R, T, R, B, type4);
-		} 
+		}*/ 
 	}
 	
 }
