@@ -16,7 +16,96 @@ public class Space {
 		for(DynamicBar b:dynamicBars){
 
 			boolean collided = false;
+
+			// top
+			if ((b.vx == 0) && (b.vy > 0)) {
+				boolean update = false;
+				double new_y=0;
+				double y_min = b.y + b.h + b.vy;
+				for (StaticBar bar : staticBars) {
+					// top
+					if (!((bar.right < b.x - b.w) || (bar.left > b.x + b.w))) {
+						if ((b.y + b.h < bar.bottom) && (bar.bottom < y_min)) {
+							y_min = bar.bottom;
+							new_y = y_min - b.h;
+							update = true;
+						}
+					}
+				}
+				if (update) {
+					b.y = new_y;
+					b.collide(b.vx, -b.vy);
+					collided = true;
+				}
+			}
+
+			// bottom
+			if ((b.vx == 0) && (b.vy < 0)) {				
+				boolean update = false;
+				double new_y=0;
+				double y_max = b.y - b.h + b.vy;
+				for (StaticBar bar : staticBars) {
+					// bottom
+					if (!((bar.right < b.x - b.w) || (bar.left > b.x + b.w))) {
+						if ((b.y - b.h > bar.top) && (bar.top > y_max)) {
+							y_max = bar.top;
+							new_y=y_max+b.h;
+							update = true;
+						}
+					}
+				}
+				if (update) {
+					b.y = new_y;
+					b.collide(b.vx, -b.vy);
+					collided = true;
+				}
+			}
 			
+			// left
+			if ((b.vx < 0) && (b.vy == 0)) {
+				boolean update = false;
+				double new_x = 0;
+				double x_max = b.x - b.w + b.vx;
+				for (StaticBar bar : staticBars) {
+					// left
+					if (!((bar.top < b.y - b.h) || (bar.bottom > b.y + b.h))) {
+						if ((b.x - b.w > bar.right) && (bar.right > x_max)) {
+							x_max = bar.right;
+							new_x = x_max + b.w;
+							update = true;
+						}
+					}
+				}
+				if (update) {
+					b.x = new_x;
+					b.collide(-b.vx, b.vy);
+					collided = true;
+				}
+			}			
+			
+			//right
+			if ((b.vx > 0) && (b.vy == 0)) {
+				boolean update = false;
+				double new_x = 0;
+				double x_min = b.x + b.w + b.vx;
+				for (StaticBar bar : staticBars) {
+					// right
+					if (!((bar.top < b.y - b.h) || (bar.bottom > b.y + b.h))) {
+						if ((b.x + b.w < bar.left) && (bar.left < x_min)) {
+							x_min = bar.left;
+							new_x = x_min - b.w;
+							update = true;
+						}
+					}
+				}
+				if (update) {
+					b.x = new_x;
+					b.collide(-b.vx, b.vy);
+					collided = true;
+				}
+			}			
+			
+
 			// top, right
 			if ((b.vy > 0) && (b.vx > 0)) {
 				double new_x=0;
@@ -57,12 +146,12 @@ public class Space {
 						}
 					}
 				}
-				if ((new_x != 0) || (new_y != 0)) {
+				collided = horizontal_flip || vertical_flip;
+				if (collided) {
 					b.x = new_x;
 					b.y = new_y;
 					if (horizontal_flip) b.collide(b.vx, -b.vy);
 					if (vertical_flip) b.collide(-b.vx, b.vy);
-					collided = horizontal_flip || vertical_flip;
 				}
 			}
 
@@ -105,14 +194,13 @@ public class Space {
 							vertical_flip = true;
 						}
 					}
-
 				}
-				if ((new_x != 0) || (new_y != 0)) {
+				collided = horizontal_flip || vertical_flip;
+				if (collided) {
 					b.x = new_x;
 					b.y = new_y;
 					if (horizontal_flip) b.collide(b.vx, -b.vy);
 					if (vertical_flip) b.collide(-b.vx, b.vy);
-					collided = horizontal_flip || vertical_flip;
 				}
 			}
 
@@ -157,12 +245,12 @@ public class Space {
 						}
 					}
 				}
-				if ((new_x != 0) || (new_y != 0)) {
+				collided = horizontal_flip || vertical_flip;
+				if (collided) {
 					b.x = new_x;
 					b.y = new_y;
 					if (horizontal_flip) b.collide(b.vx, -b.vy);
 					if (vertical_flip) b.collide(-b.vx, b.vy);
-					collided = horizontal_flip || vertical_flip;
 				}
 			}
 
@@ -207,12 +295,12 @@ public class Space {
 						}
 					}
 				}
-				if ((new_x != 0) || (new_y != 0)) {
+				collided = horizontal_flip || vertical_flip;
+				if (collided) {
 					b.x = new_x;
 					b.y = new_y;
 					if (horizontal_flip) b.collide(b.vx, -b.vy);
 					if (vertical_flip) b.collide(-b.vx, b.vy);
-					collided = horizontal_flip || vertical_flip;
 				}
 			}
 			
