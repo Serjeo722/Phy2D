@@ -8,9 +8,10 @@ import playn.easy.phy2d.DebugRenderer;
 import playn.easy.phy2d.DynamicBar;
 import playn.easy.phy2d.Space;
 import playn.easy.phy2d.Space.BarType;
+import playn.easy.phy2d.VelocityChanger;
 import playn.easy.phy2d.StaticBar;
 
-public class Game implements playn.core.Game, DebugRenderer, Renderer {
+public class Game implements playn.core.Game, DebugRenderer, Renderer, VelocityChanger {
 
 	private Space space;
 	private int BOUND=30;
@@ -20,7 +21,7 @@ public class Game implements playn.core.Game, DebugRenderer, Renderer {
 	
 	@Override
 	public void init() {
-		space = new Space();
+		space = new Space(this);
 		ImmediateLayer layer=PlayN.graphics().createImmediateLayer(1024,800, this);
 		PlayN.graphics().rootLayer().add(layer);
 		
@@ -40,11 +41,11 @@ public class Game implements playn.core.Game, DebugRenderer, Renderer {
 		while(i<500){
 			int x=BOUND+SIZE/2+(int)(Math.random()*(1024-2*(BOUND+SIZE)));
 			int y=BOUND+SIZE/2+(int)(Math.random()*(800-2*(BOUND+SIZE)));
-			double vx=Math.random()*1;
-			double vy=Math.random()*1;
+			double vx=Math.random()*10;
+			double vy=Math.random()*10;
 
-			DynamicBar bar = new DynamicBar(x, y, SIZE*Math.random(), SIZE*Math.random());
-			bar.setSpeed(vy, vx);
+			DynamicBar bar = new DynamicBar(x, y, 5, 5);
+			bar.setSpeed(vx, vy);
 			if (!space.cross(bar)) {
 				space.add(bar);
 				i++;
@@ -84,6 +85,11 @@ public class Game implements playn.core.Game, DebugRenderer, Renderer {
 	public void render(Surface surface) {
 		this.surface=surface;
 		space.render(this);
+	}
+
+	@Override
+	public void changeVelocityOf(DynamicBar bar) {
+		bar.vy+=0.1f;
 	}
 
 }
