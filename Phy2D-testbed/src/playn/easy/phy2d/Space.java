@@ -3,6 +3,7 @@ package playn.easy.phy2d;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 import playn.core.PlayN;
 
@@ -10,6 +11,25 @@ public class Space {
 
 	public enum BarType {
 		STATIC, DYNAMIC, RED;
+	}
+	
+	private class StaticBarPair {
+		public double bL;
+		public double bH;
+		public int L;
+		public int H;
+		public double value;
+
+		public StaticBarPair(double value) {
+			this.value = value;
+		}
+
+		public StaticBarPair(int l, int h, double bL, double bH) {
+			this.L = l;
+			this.H = h;
+			this.bL = bL;
+			this.bH = bH;
+		}
 	}
 	
 	private static double MAX_VELOCITY = 1000f;
@@ -23,62 +43,64 @@ public class Space {
 		this.velocityChanger = speedChanger;
 	}
 
+	private List<StaticBar> indexStaticBottom;
+	private ArrayList<StaticBarPair> indexStaticPairsBottom;  
 
-	private ArrayList<StaticBar> bottomIndex;
-	private ArrayList<StaticBar> leftIndex;
+	private List<StaticBar> indexStaticTop;
+	private ArrayList<StaticBarPair> indexStaticPairsTop;  
 
-	private ArrayList<StaticBar> rightIndex;
-	private ArrayList<StaticBar> topIndex;
+	private List<StaticBar> indexStaticLeft;
+	private ArrayList<StaticBarPair> indexStaticPairsLeft;  
+
+	private List<StaticBar> indexStaticRight;
+	private ArrayList<StaticBarPair> indexStaticPairsRight;  
+
+	private Comparator<StaticBar> bottomComparator = new Comparator<StaticBar>(){
+		@Override
+		public int compare(StaticBar b1, StaticBar b2) {
+			return b1.bottom < b2.bottom ? -1 : b1.bottom > b2.bottom ? 1 : 0;
+		}
+	};
+
+	private Comparator<StaticBar> leftComparator = new Comparator<StaticBar>(){
+		@Override
+		public int compare(StaticBar b1, StaticBar b2) {
+			return b1.left < b2.left ? -1 : b1.left > b2.left ? 1 : 0;
+		}
+	};
+	
+	private Comparator<StaticBar> topComparator = new Comparator<StaticBar>(){
+		@Override
+		public int compare(StaticBar b1, StaticBar b2) {
+			return b1.top > b2.top ? -1 : b1.top < b2.top ? 1 : 0;
+		}
+	};		
+
+	private Comparator<StaticBar> rightComparator = new Comparator<StaticBar>(){
+		@Override
+		public int compare(StaticBar b1, StaticBar b2) {
+			return b1.right > b2.right ? -1 : b1.right < b2.right ? 1 : 0;
+		}
+	};		
 	
 	private int lastStaticChangeN = 0;
 	private int previousStaticChangeN = 0;
 	
 	public void rebuildStaticIndexes(){
-		bottomIndex = new ArrayList<StaticBar>(staticBars);
-		leftIndex = new ArrayList<StaticBar>(staticBars);
-		topIndex = new ArrayList<StaticBar>(staticBars);
-		rightIndex = new ArrayList<StaticBar>(staticBars);
 		
-		Collections.sort(bottomIndex, new Comparator<StaticBar>() {
-			@Override
-			public int compare(StaticBar b1, StaticBar b2) {
-				return b1.bottom < b2.bottom ? -1 : b1.bottom > b2.bottom ? 1 : 0;
-			}
-		});
+		binaryIndexTop();
+		binaryIndexRight();
+		binaryIndexBottom();
+		binaryIndexLeft();
 
-		Collections.sort(leftIndex, new Comparator<StaticBar>() {
-			@Override
-			public int compare(StaticBar b1, StaticBar b2) {
-				return b1.left < b2.left ? -1 : b1.left > b2.left ? 1 : 0;
-			}
-		});
-
-		Collections.sort(rightIndex, new Comparator<StaticBar>() {
-			@Override
-			public int compare(StaticBar b1, StaticBar b2) {
-				return b1.right < b2.right ? -1 : b1.right > b2.right ? 1 : 0;
-			}
-		});
-
-		Collections.sort(topIndex, new Comparator<StaticBar>() {
-			@Override
-			public int compare(StaticBar b1, StaticBar b2) {
-				return b1.top < b2.top ? -1 : b1.top > b2.top ? 1 : 0;
-			}
-		});
-
-		for(StaticBar b:topIndex)
-		{PlayN.log().debug("top="+b.top);
-		}
+		previousStaticChangeN = lastStaticChangeN;
 	}
 	
 	public void step(double delta){
 
 		// rebuild indexes if need
-		if (previousStaticChangeN < lastStaticChangeN){
-			rebuildStaticIndexes();
-			previousStaticChangeN = lastStaticChangeN;
-		}
+		if (previousStaticChangeN < lastStaticChangeN) rebuildStaticIndexes();
+		
 		
 		for(DynamicBar b:dynamicBars){
 			if (velocityChanger != null)
@@ -93,6 +115,22 @@ public class Space {
 			if ((b.vx == 0) && (b.vy > 0) && (!collided)) {
 				double new_y=0;
 				double y_min = b.y + b.h + b.vy;
+				
+				// indexed collision check
+				int indexBottom = binarySearchBottom(b.y + b.h);
+				while ((indexBottom >= 0) && (indexBottom < indexStaticBottom.size())) {
+					double value=indexStaticBottom.get(indexBottom).bottom;
+					if (y_min < value) break;
+					if (!((indexStaticBottom.get(indexBottom).right < b.x - b.w) || (indexStaticBottom.get(indexBottom).left > b.x + b.w))) {
+						y_min = value;
+						new_y = y_min - b.h;
+						collided = true;
+						break;
+					}
+					indexBottom++;
+				}
+				
+				/* not indexed collision check
 				for (StaticBar bar : staticBars) {
 					// top
 					if (!((bar.right < b.x - b.w) || (bar.left > b.x + b.w))) {
@@ -102,7 +140,7 @@ public class Space {
 							collided = true;
 						}
 					}
-				}
+				}*/
 				if (collided) {
 					b.y = new_y;
 					b.collide(b.vx, -b.vy);
@@ -114,6 +152,22 @@ public class Space {
 			if ((b.vx == 0) && (b.vy < 0) && (!collided)) {				
 				double new_y=0;
 				double y_max = b.y - b.h + b.vy;
+
+				// indexed collision search
+				int indexTop = binarySearchTop(b.y - b.h);
+				while ((indexTop >= 0) && (indexTop < indexStaticTop.size())) {
+					double value=indexStaticTop.get(indexTop).top;
+					if (y_max > value) break;
+					if (!((indexStaticTop.get(indexTop).right < b.x - b.w) || (indexStaticTop.get(indexTop).left > b.x + b.w))) {
+						y_max = value;
+						new_y = y_max + b.h;
+						collided = true;
+						break;
+					}
+					indexTop++;
+				}
+
+				/* not indexed collision search
 				for (StaticBar bar : staticBars) {
 					// bottom
 					if (!((bar.right < b.x - b.w) || (bar.left > b.x + b.w))) {
@@ -123,7 +177,7 @@ public class Space {
 							collided = true;
 						}
 					}
-				}
+				}*/
 				if (collided) {
 					b.y = new_y;
 					b.collide(b.vx, -b.vy);
@@ -135,6 +189,23 @@ public class Space {
 			if ((b.vx < 0) && (b.vy == 0) && (!collided)) {
 				double new_x = 0;
 				double x_max = b.x - b.w + b.vx;
+				
+				// indexed collision search
+				int indexRight = binarySearchRight(b.x - b.w);
+				while ((indexRight >= 0) && (indexRight < indexStaticRight.size())) {
+					double value=indexStaticRight.get(indexRight).right;
+					if (x_max > value) break;
+					if (!((indexStaticRight.get(indexRight).top < b.y - b.h) || (indexStaticRight.get(indexRight).bottom > b.y + b.h))) {
+						x_max = value;
+						new_x = x_max + b.w;
+						collided = true;
+						break;
+					}
+					indexRight++;
+				}
+
+				
+				/* not indexed collision search
 				for (StaticBar bar : staticBars) {
 					// left
 					if (!((bar.top < b.y - b.h) || (bar.bottom > b.y + b.h))) {
@@ -144,7 +215,7 @@ public class Space {
 							collided = true;
 						}
 					}
-				}
+				}*/
 				if (collided) {
 					b.x = new_x;
 					b.collide(-b.vx, b.vy);
@@ -156,6 +227,20 @@ public class Space {
 			if ((b.vx > 0) && (b.vy == 0) && (!collided)) {
 				double new_x = 0;
 				double x_min = b.x + b.w + b.vx;
+				
+				// indexed collision check
+				int indexLeft = binarySearchLeft(b.x + b.w);
+				while ((indexLeft >= 0) && (indexLeft < indexStaticLeft.size())) {
+					double value=indexStaticLeft.get(indexLeft).left;
+					if (x_min < value) break;
+					if (!((indexStaticLeft.get(indexLeft).top < b.y - b.h) || (indexStaticLeft.get(indexLeft).bottom > b.y + b.h))) {
+						x_min = value;
+						new_x = x_min - b.w;
+						collided = true;
+					}
+					indexLeft++;
+				}
+				/* not indexed collision check
 				for (StaticBar bar : staticBars) {
 					// right
 					if (!((bar.top < b.y - b.h) || (bar.bottom > b.y + b.h))) {
@@ -165,7 +250,7 @@ public class Space {
 							collided = true;
 						}
 					}
-				}
+				}*/
 				if (collided) {
 					b.x = new_x;
 					b.collide(-b.vx, b.vy);
@@ -433,33 +518,159 @@ public class Space {
 			render.line(bar.left, bar.top, bar.left, bar.bottom, BarType.STATIC);
 			render.line(bar.right, bar.top, bar.right, bar.bottom, BarType.STATIC);
 		}
-		
-		
-		/*
-		for(Bar bar:staticBars){
-			
-			Bar.Type type1 = Bar.Type.STATIC;
-			Bar.Type type2 = Bar.Type.STATIC;
-			Bar.Type type3 = Bar.Type.STATIC;
-			Bar.Type type4 = Bar.Type.STATIC;
-
-			int L = (int) (bar.x - bar.width / 2);
-			int R = (int) (bar.x + bar.width / 2);
-			int T = (int) (bar.y + bar.height / 2);
-			int B = (int) (bar.y - bar.height / 2);
-
-			for(Bar b2:dynamicBars){
-				if (b2.isHorizontalCross(L, R, T)) type1=Bar.Type.DYNAMIC;
-				if (b2.isHorizontalCross(L, R, B)) type2=Bar.Type.DYNAMIC;
-				if (b2.isVerticalCross(B, T, L)) type3 = Bar.Type.DYNAMIC;
-				if (b2.isVerticalCross(B, T, R)) type4 = Bar.Type.DYNAMIC;
-			}
-			
-			render.line(L, T, R, T, type1);
-			render.line(L, B, R, B, type2);
-			render.line(L, T, L, B, type3);
-			render.line(R, T, R, B, type4);
-		}*/ 
 	}
 	
+	
+	// functions for indexes
+	public void binaryIndexTop(){
+		indexStaticTop = new ArrayList<StaticBar>(staticBars);
+		Collections.sort(indexStaticTop, topComparator);
+		indexStaticPairsTop = new ArrayList<StaticBarPair>();
+		int l = 1;
+		int h = 0;
+		for (@SuppressWarnings("unused") StaticBar bar : indexStaticTop) {
+			if (l < indexStaticTop.size()) {
+				if (indexStaticTop.get(l).top < indexStaticTop.get(h).top) {
+					indexStaticPairsTop.add(new StaticBarPair(l, h, indexStaticTop.get(l).top, indexStaticTop.get(h).top));
+					h = l;
+				}
+				l++;
+			}
+		}
+	}
+	
+	public void binaryIndexRight(){
+		indexStaticRight = new ArrayList<StaticBar>(staticBars);
+		Collections.sort(indexStaticRight, rightComparator);
+		indexStaticPairsRight = new ArrayList<StaticBarPair>();
+		int l = 1;
+		int h = 0;
+		for (@SuppressWarnings("unused") StaticBar bar : indexStaticRight) {
+			if (l < indexStaticRight.size()) {
+				if (indexStaticRight.get(l).right < indexStaticRight.get(h).right) {
+					indexStaticPairsRight.add(new StaticBarPair(l, h, indexStaticRight.get(l).right, indexStaticRight.get(h).right));
+					h = l;
+				}
+				l++;
+			}
+		}
+	}
+	
+	public void binaryIndexBottom(){
+		indexStaticBottom = new ArrayList<StaticBar>(staticBars);
+		Collections.sort(indexStaticBottom, bottomComparator);
+		indexStaticPairsBottom = new ArrayList<StaticBarPair>();
+		int l=0;
+		int h=1;
+		for (@SuppressWarnings("unused") StaticBar bar : indexStaticBottom) {
+			if (h < indexStaticBottom.size()) {
+				if (indexStaticBottom.get(h).bottom > indexStaticBottom.get(l).bottom) {
+					indexStaticPairsBottom.add(new StaticBarPair(l, h, indexStaticBottom.get(l).bottom, indexStaticBottom.get(h).bottom));
+					l = h;
+				}
+				h++;
+			}
+		}
+	}
+
+	public void binaryIndexLeft(){
+		indexStaticLeft = new ArrayList<StaticBar>(staticBars);
+		Collections.sort(indexStaticLeft, leftComparator);
+		indexStaticPairsLeft = new ArrayList<StaticBarPair>();
+		int l=0;
+		int h=1;
+		for (@SuppressWarnings("unused") StaticBar bar : indexStaticLeft) {
+			if (h < indexStaticLeft.size()) {
+				if (indexStaticLeft.get(h).left > indexStaticLeft.get(l).left) {
+					indexStaticPairsLeft.add(new StaticBarPair(l, h, indexStaticLeft.get(l).left, indexStaticLeft.get(h).left));
+					l = h;
+				}
+				h++;
+			}
+		}
+	}
+
+	public int binarySearchTop(double value){
+		if (indexStaticPairsTop.isEmpty()){
+			if(indexStaticTop.isEmpty()) return -1;
+			else 
+				if(indexStaticTop.get(0).top>value) return -1;
+		} 
+		int i = Collections.binarySearch(indexStaticPairsTop, new StaticBarPair(value), new Comparator<StaticBarPair>(){
+			@Override
+			public int compare(StaticBarPair pair, StaticBarPair edge) {
+				return pair.bH <= edge.value ? 1 : pair.bL > edge.value ? -1 : 0;
+			}
+		});
+		if (i == -1) return 0;
+		if (i < -1) {
+			if (indexStaticPairsTop.get(indexStaticPairsTop.size() - 1).bH == value) return indexStaticPairsTop.get(indexStaticPairsTop.size() - 1).H;
+			return -1;
+		}
+		if (indexStaticPairsTop.get(i).bH == value) return indexStaticPairsTop.get(i).H;
+		return indexStaticPairsTop.get(i).L;
+	}
+
+	public int binarySearchRight(double value){
+		if (indexStaticPairsRight.isEmpty()){
+			if(indexStaticRight.isEmpty()) return -1;
+			else 
+				if(indexStaticRight.get(0).right>value) return -1;
+		} 
+		int i = Collections.binarySearch(indexStaticPairsRight, new StaticBarPair(value), new Comparator<StaticBarPair>(){
+			@Override
+			public int compare(StaticBarPair pair, StaticBarPair edge) {
+				return pair.bH <= edge.value ? 1 : pair.bL > edge.value ? -1 : 0;
+			}
+		});
+		if (i == -1) return 0;
+		if (i < -1) {
+			if (indexStaticPairsRight.get(indexStaticPairsRight.size() - 1).bH == value) return indexStaticPairsRight.get(indexStaticPairsRight.size() - 1).H;
+			return -1;
+		}
+		if (indexStaticPairsRight.get(i).bH == value) return indexStaticPairsRight.get(i).H;
+		return indexStaticPairsRight.get(i).L;
+	}
+	
+	public int binarySearchBottom(double value){
+		if (indexStaticPairsBottom.isEmpty()){
+			if(indexStaticBottom.isEmpty()) return -1;
+			else 
+				if(indexStaticBottom.get(0).bottom<value) return -1;
+		} 
+		int i = Collections.binarySearch(indexStaticPairsBottom, new StaticBarPair(value), new Comparator<StaticBarPair>(){
+			@Override
+			public int compare(StaticBarPair pair, StaticBarPair edge) {
+				return pair.bH <= edge.value ? -1 : pair.bL > edge.value ? 1 : 0;
+			}
+		});
+		if (i == -1) return 0;
+		if (i < -1) {
+			if (indexStaticPairsBottom.get(indexStaticPairsBottom.size() - 1).bH == value) return indexStaticPairsBottom.get(indexStaticPairsBottom.size() - 1).H;
+			return -1;
+		}
+		if (indexStaticPairsBottom.get(i).bL == value) return indexStaticPairsBottom.get(i).L;
+		return indexStaticPairsBottom.get(i).H;
+	}
+	
+	public int binarySearchLeft(double value){
+		if (indexStaticPairsLeft.isEmpty()){
+			if(indexStaticLeft.isEmpty()) return -1;
+			else 
+				if(indexStaticLeft.get(0).left<value) return -1;
+		} 
+		int i = Collections.binarySearch(indexStaticPairsLeft, new StaticBarPair(value), new Comparator<StaticBarPair>(){
+			@Override
+			public int compare(StaticBarPair pair, StaticBarPair edge) {
+				return pair.bH <= edge.value ? -1 : pair.bL > edge.value ? 1 : 0;
+			}
+		});
+		if (i == -1) return 0;
+		if (i < -1) {
+			if (indexStaticPairsLeft.get(indexStaticPairsLeft.size() - 1).bH == value) return indexStaticPairsLeft.get(indexStaticPairsLeft.size() - 1).H;
+			return -1;
+		}
+		if (indexStaticPairsLeft.get(i).bL == value) return indexStaticPairsLeft.get(i).L;
+		return indexStaticPairsLeft.get(i).H;
+	}
 }

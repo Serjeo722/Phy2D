@@ -52,7 +52,7 @@ public class DynamicBar {
 		this.px=new_vx;
 		this.py=new_vy;
 		this.vx=new_vx;
-		this.vy=new_vy/1.01f;
+		this.vy=new_vy/1.1f;
 	}
 
 }

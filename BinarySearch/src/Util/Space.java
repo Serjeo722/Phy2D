@@ -7,18 +7,18 @@ import java.util.List;
 
 public class Space {
 	
-	public class StaticBarPair{
+	private class StaticBarPair {
 		public double bL;
 		public double bH;
 		public int L;
 		public int H;
 		public double value;
-		
-		public StaticBarPair(double value){
+
+		public StaticBarPair(double value) {
 			this.value = value;
 		}
-		
-		public StaticBarPair(int l,int h,double bL,double bH){
+
+		public StaticBarPair(int l, int h, double bL, double bH) {
 			this.L = l;
 			this.H = h;
 			this.bL = bL;
@@ -74,7 +74,7 @@ public class Space {
 		
 		for(int i=1;i<10;i++){
 			int v= (int)(10*Math.random());
-			staticBars.add(new StaticBar(v,v,0,0));
+			staticBars.add(new StaticBar(v,v+10,2,2));
 		}
 		
 		
@@ -86,28 +86,29 @@ public class Space {
 		
 		int i=0;
 		
-		for(StaticBar bar:indexStaticLeft){
-			System.out.println(i+") left="+bar.left);
+		for(StaticBar bar:indexStaticRight){
+			System.out.println(i+") right="+bar.right);
 			i++;
 		}
 
 
-		for(StaticBarPair sbp:indexStaticPairsLeft)
-			System.out.println("left High["+sbp.H+"]="+sbp.bH+" Low["+sbp.L+"]="+sbp.bL);
+		for(StaticBarPair sbp:indexStaticPairsRight)
+			System.out.println("right High["+sbp.H+"]="+sbp.bH+" Low["+sbp.L+"]="+sbp.bL);
 
 
 		
 		for(double j=-3;j<13;j+=0.5)
-		System.out.println("j="+j+" searched="+binarySearchLeft(j));
+		System.out.println("j="+j+" searched="+binarySearchRight(j));
 
-		double vx = -2;
-		double rightBound = 5;
-		int indexLeft = binarySearchLeft(rightBound);
-		while ((indexLeft >= 0) && (indexLeft < indexStaticRight.size())) {
-			double value=indexStaticLeft.get(indexLeft).left;
-			if (rightBound + vx > value) break;
-			System.out.println("5 lefts=" + indexStaticLeft.get(indexLeft).left);
-			indexLeft++;
+		
+		double vx = 0;
+		double leftBound = 5;
+		int indexRight = binarySearchRight(leftBound);
+		while ((indexRight >= 0) && (indexRight < indexStaticRight.size())) {
+			double value=indexStaticRight.get(indexRight).right;
+			if (leftBound + vx < value) break;
+			System.out.println("5 rights=" + indexRight);
+			indexRight++;
 		}
 	}
 
