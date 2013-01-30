@@ -36,6 +36,7 @@ public class Game implements playn.core.Game, DebugRenderer, Renderer, VelocityC
 			StaticBar bar = new StaticBar(x, y, STATIC_SIZE*Math.random(), STATIC_SIZE*Math.random());
 			space.add(bar);
 		}
+		space.rebuildStaticIndexes();
 		
 		int i=0;
 		while(i<500){

@@ -1,6 +1,8 @@
 package playn.easy.phy2d;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import playn.core.PlayN;
 
@@ -18,10 +20,65 @@ public class Space {
 	private VelocityChanger velocityChanger = null;
 	
 	public Space(VelocityChanger speedChanger){
-		this.velocityChanger=speedChanger;
+		this.velocityChanger = speedChanger;
+	}
+
+
+	private ArrayList<StaticBar> bottomIndex;
+	private ArrayList<StaticBar> leftIndex;
+
+	private ArrayList<StaticBar> rightIndex;
+	private ArrayList<StaticBar> topIndex;
+	
+	private int lastStaticChangeN = 0;
+	private int previousStaticChangeN = 0;
+	
+	public void rebuildStaticIndexes(){
+		bottomIndex = new ArrayList<StaticBar>(staticBars);
+		leftIndex = new ArrayList<StaticBar>(staticBars);
+		topIndex = new ArrayList<StaticBar>(staticBars);
+		rightIndex = new ArrayList<StaticBar>(staticBars);
+		
+		Collections.sort(bottomIndex, new Comparator<StaticBar>() {
+			@Override
+			public int compare(StaticBar b1, StaticBar b2) {
+				return b1.bottom < b2.bottom ? -1 : b1.bottom > b2.bottom ? 1 : 0;
+			}
+		});
+
+		Collections.sort(leftIndex, new Comparator<StaticBar>() {
+			@Override
+			public int compare(StaticBar b1, StaticBar b2) {
+				return b1.left < b2.left ? -1 : b1.left > b2.left ? 1 : 0;
+			}
+		});
+
+		Collections.sort(rightIndex, new Comparator<StaticBar>() {
+			@Override
+			public int compare(StaticBar b1, StaticBar b2) {
+				return b1.right < b2.right ? -1 : b1.right > b2.right ? 1 : 0;
+			}
+		});
+
+		Collections.sort(topIndex, new Comparator<StaticBar>() {
+			@Override
+			public int compare(StaticBar b1, StaticBar b2) {
+				return b1.top < b2.top ? -1 : b1.top > b2.top ? 1 : 0;
+			}
+		});
+
+		for(StaticBar b:topIndex)
+		{PlayN.log().debug("top="+b.top);
+		}
 	}
 	
 	public void step(double delta){
+
+		// rebuild indexes if need
+		if (previousStaticChangeN < lastStaticChangeN){
+			rebuildStaticIndexes();
+			previousStaticChangeN = lastStaticChangeN;
+		}
 		
 		for(DynamicBar b:dynamicBars){
 			if (velocityChanger != null)
@@ -29,7 +86,7 @@ public class Space {
 			
 			highVelocityBoundCheck(b);
 			//lowVelocityBoundCheck(b);
-			
+
 			boolean collided = false;
 
 			// top
@@ -348,6 +405,7 @@ public class Space {
 	
 	public void add(StaticBar bar){
 		staticBars.add(bar);
+		lastStaticChangeN++;
 	}
 
 	public void add(DynamicBar bar){
