@@ -266,11 +266,52 @@ public class Space {
 				
 				double x_min = b.x + b.w + b.vx;
 				double y_min = b.y + b.h + b.vy;
-				double path_min=b.path();
+				double path_min = b.path();
 
 				boolean horizontal_flip = false;
 				boolean vertical_flip = false;				
+
+				// top indexed collision check
+				int indexBottom = binarySearchBottom(b.y + b.h);
+				while ((indexBottom >= 0) && (indexBottom < indexStaticBottom.size())) {
+					double value=indexStaticBottom.get(indexBottom).bottom;
+					if (y_min < value) break;
+					double x = b.x + (indexStaticBottom.get(indexBottom).bottom - b.y - b.h) * b.vx / b.vy;
+					if (!((indexStaticBottom.get(indexBottom).right < x - b.w) || (indexStaticBottom.get(indexBottom).left > x + b.w))) {
+						if ((b.y + b.h <= indexStaticBottom.get(indexBottom).bottom) && (b.pathY(indexStaticBottom.get(indexBottom).bottom - b.y - b.h) < path_min)) {
+							y_min = value;
+							path_min = b.pathY(indexStaticBottom.get(indexBottom).bottom - b.y - b.h);
+							new_y = y_min - b.h;
+							new_x = x;
+							horizontal_flip = true;
+							vertical_flip = false;
+							break;
+						}
+					}
+					indexBottom++;
+				}
+
+				// right indexed collision check
+				int indexLeft = binarySearchLeft(b.x + b.w);
+				while ((indexLeft >= 0) && (indexLeft < indexStaticLeft.size())) {
+					double value=indexStaticLeft.get(indexLeft).left;
+					if (x_min < value) break;
+					double y = b.y + (indexStaticLeft.get(indexLeft).left - b.x - b.w) * b.vy / b.vx;
+					
+					if (!((indexStaticLeft.get(indexLeft).top < y - b.h) || (indexStaticLeft.get(indexLeft).bottom > y + b.h))) {
+						if ((b.x + b.w <= indexStaticLeft.get(indexLeft).left) && (b.pathX(indexStaticLeft.get(indexLeft).left - b.x - b.w) < path_min)) {
+							x_min = value;
+							path_min = b.pathX(indexStaticLeft.get(indexLeft).left - b.x - b.w);
+							new_x = x_min - b.w;
+							new_y = y;
+							horizontal_flip = false;
+							vertical_flip = true;
+						}
+					}
+					indexLeft++;
+				}
 				
+				/* top-right not indexed search
 				for (StaticBar bar : staticBars) {
 					
 					// top
@@ -298,7 +339,7 @@ public class Space {
 							vertical_flip = true;
 						}
 					}
-				}
+				}*/
 				collided = horizontal_flip || vertical_flip;
 				if (collided) {
 					b.x = new_x;
@@ -320,6 +361,47 @@ public class Space {
 				boolean horizontal_flip = false;
 				boolean vertical_flip = false;				
 
+				// bottom indexed collision search
+				int indexTop = binarySearchTop(b.y - b.h);
+				while ((indexTop >= 0) && (indexTop < indexStaticTop.size())) {
+					double value=indexStaticTop.get(indexTop).top;
+					if (y_max > value) break;
+					double x = b.x - (b.y - b.h-indexStaticTop.get(indexTop).top) * b.vx / b.vy;
+					if (!((indexStaticTop.get(indexTop).right < x - b.w) || (indexStaticTop.get(indexTop).left > x + b.w))) {
+						if ((b.y - b.h >= indexStaticTop.get(indexTop).top) && (b.pathY(b.y - b.h-indexStaticTop.get(indexTop).top) < path_min)) {
+							y_max = value;
+							path_min=b.pathY(b.y - b.h-indexStaticTop.get(indexTop).top);
+							new_y = y_max + b.h;
+							new_x = x;
+							horizontal_flip = true;
+							vertical_flip = false;
+							break;
+						}
+					}
+					indexTop++;
+				}
+
+				// left indexed collision search
+				int indexRight = binarySearchRight(b.x - b.w);
+				while ((indexRight >= 0) && (indexRight < indexStaticRight.size())) {
+					double value=indexStaticRight.get(indexRight).right;
+					if (x_max > value) break;
+					double y = b.y - (b.x - b.w-indexStaticRight.get(indexRight).right) * b.vy / b.vx;
+					if (!((indexStaticRight.get(indexRight).top < y - b.h) || (indexStaticRight.get(indexRight).bottom > y + b.h))) {
+						if ((b.x - b.w >= indexStaticRight.get(indexRight).right) && (b.pathX(b.x-b.w-indexStaticRight.get(indexRight).right) < path_min)) {
+							x_max = value;
+							path_min=b.pathX(b.x-b.w-indexStaticRight.get(indexRight).right);
+							new_x = x_max + b.w;
+							new_y = y;
+							horizontal_flip = false;
+							vertical_flip = true;
+							break;
+						}
+					}
+					indexRight++;
+				}					
+					
+				/* not indexed bottom+left
 				for (StaticBar bar : staticBars) {
 
 					// bottom
@@ -347,7 +429,7 @@ public class Space {
 							vertical_flip = true;
 						}
 					}
-				}
+				}*/
 				collided = horizontal_flip || vertical_flip;
 				if (collided) {
 					b.x = new_x;
@@ -370,6 +452,47 @@ public class Space {
 				boolean horizontal_flip = false;
 				boolean vertical_flip = false;				
 				
+				// top indexed collision check
+				int indexBottom = binarySearchBottom(b.y + b.h);
+				while ((indexBottom >= 0) && (indexBottom < indexStaticBottom.size())) {
+					double value=indexStaticBottom.get(indexBottom).bottom;
+					if (y_min < value) break;
+					double x = b.x + (indexStaticBottom.get(indexBottom).bottom - b.y - b.h) * b.vx / b.vy;
+					if (!((indexStaticBottom.get(indexBottom).right < x - b.w) || (indexStaticBottom.get(indexBottom).left > x + b.w))) {
+						if ((b.y + b.h <= indexStaticBottom.get(indexBottom).bottom) && (b.pathY(indexStaticBottom.get(indexBottom).bottom - b.y - b.h) < path_min)) {
+							y_min = value;
+							path_min = b.pathY(indexStaticBottom.get(indexBottom).bottom - b.y - b.h);
+							new_y = y_min - b.h;
+							new_x = x;
+							horizontal_flip = true;
+							vertical_flip = false;
+							break;
+						}
+					}
+					indexBottom++;
+				}
+				
+				// left indexed collision search
+				int indexRight = binarySearchRight(b.x - b.w);
+				while ((indexRight >= 0) && (indexRight < indexStaticRight.size())) {
+					double value=indexStaticRight.get(indexRight).right;
+					if (x_max > value) break;
+					double y = b.y - (b.x - b.w-indexStaticRight.get(indexRight).right) * b.vy / b.vx;
+					if (!((indexStaticRight.get(indexRight).top < y - b.h) || (indexStaticRight.get(indexRight).bottom > y + b.h))) {
+						if ((b.x - b.w >= indexStaticRight.get(indexRight).right) && (b.pathX(b.x-b.w-indexStaticRight.get(indexRight).right) < path_min)) {
+							x_max = value;
+							path_min=b.pathX(b.x-b.w-indexStaticRight.get(indexRight).right);
+							new_x = x_max + b.w;
+							new_y = y;
+							horizontal_flip = false;
+							vertical_flip = true;
+							break;
+						}
+					}
+					indexRight++;
+				}					
+				
+				/* top left not indexed collisions
 				for (StaticBar bar : staticBars) {
 					double x = b.x + (bar.bottom - b.y - b.h) * b.vx / b.vy;
 					
@@ -398,6 +521,7 @@ public class Space {
 						}
 					}
 				}
+				*/
 				collided = horizontal_flip || vertical_flip;
 				if (collided) {
 					b.x = new_x;
@@ -420,6 +544,47 @@ public class Space {
 				boolean horizontal_flip = false;
 				boolean vertical_flip = false;				
 
+				// right indexed collision check
+				int indexLeft = binarySearchLeft(b.x + b.w);
+				while ((indexLeft >= 0) && (indexLeft < indexStaticLeft.size())) {
+					double value=indexStaticLeft.get(indexLeft).left;
+					if (x_min < value) break;
+					double y = b.y + (indexStaticLeft.get(indexLeft).left - b.x - b.w) * b.vy / b.vx;
+					
+					if (!((indexStaticLeft.get(indexLeft).top < y - b.h) || (indexStaticLeft.get(indexLeft).bottom > y + b.h))) {
+						if ((b.x + b.w <= indexStaticLeft.get(indexLeft).left) && (b.pathX(indexStaticLeft.get(indexLeft).left - b.x - b.w) < path_min)) {
+							x_min = value;
+							path_min = b.pathX(indexStaticLeft.get(indexLeft).left - b.x - b.w);
+							new_x = x_min - b.w;
+							new_y = y;
+							horizontal_flip = false;
+							vertical_flip = true;
+						}
+					}
+					indexLeft++;
+				}
+
+				// bottom indexed collision search
+				int indexTop = binarySearchTop(b.y - b.h);
+				while ((indexTop >= 0) && (indexTop < indexStaticTop.size())) {
+					double value=indexStaticTop.get(indexTop).top;
+					if (y_max > value) break;
+					double x = b.x - (b.y - b.h-indexStaticTop.get(indexTop).top) * b.vx / b.vy;
+					if (!((indexStaticTop.get(indexTop).right < x - b.w) || (indexStaticTop.get(indexTop).left > x + b.w))) {
+						if ((b.y - b.h >= indexStaticTop.get(indexTop).top) && (b.pathY(b.y - b.h-indexStaticTop.get(indexTop).top) < path_min)) {
+							y_max = value;
+							path_min=b.pathY(b.y - b.h-indexStaticTop.get(indexTop).top);
+							new_y = y_max + b.h;
+							new_x = x;
+							horizontal_flip = true;
+							vertical_flip = false;
+							break;
+						}
+					}
+					indexTop++;
+				}
+
+				/*
 				for (StaticBar bar : staticBars) {
 
 					// bottom
@@ -447,7 +612,7 @@ public class Space {
 							vertical_flip = true;
 						}
 					}
-				}
+				}*/
 				collided = horizontal_flip || vertical_flip;
 				if (collided) {
 					b.x = new_x;

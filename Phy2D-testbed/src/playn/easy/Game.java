@@ -15,7 +15,7 @@ public class Game implements playn.core.Game, DebugRenderer, Renderer, VelocityC
 
 	private Space space;
 	private int BOUND=30;
-	private int SIZE=10;
+	private int SIZE=140;
 	private int STATIC_SIZE=20;
 	
 	
@@ -39,10 +39,10 @@ public class Game implements playn.core.Game, DebugRenderer, Renderer, VelocityC
 		space.rebuildStaticIndexes();
 		
 		int i=0;
-		while(i<500){
+		while(i<10000){
 			int x=BOUND+SIZE/2+(int)(Math.random()*(1024-2*(BOUND+SIZE)));
 			int y=BOUND+SIZE/2+(int)(Math.random()*(800-2*(BOUND+SIZE)));
-			double vx=0;//-Math.random()*10;
+			double vx=Math.random()*10;
 			double vy=0;//Math.random()*10;
 
 			DynamicBar bar = new DynamicBar(x, y, 5, 5);
@@ -90,8 +90,7 @@ public class Game implements playn.core.Game, DebugRenderer, Renderer, VelocityC
 
 	@Override
 	public void changeVelocityOf(DynamicBar bar) {
-		//bar.vx-=0.1f;
-		bar.vy-=0.5f;
+		bar.vy+=0.1f;
 	}
 
 }
