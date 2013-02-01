@@ -14,10 +14,9 @@ import playn.easy.phy2d.StaticBar;
 public class Game implements playn.core.Game, DebugRenderer, Renderer, VelocityChanger {
 
 	private Space space;
-	private int BOUND=30;
-	private int SIZE=140;
-	private int STATIC_SIZE=20;
-	
+	private int BOUND = 30;
+	private int SIZE = 6;
+	private int STATIC_SIZE = 20;	
 	
 	@Override
 	public void init() {
@@ -25,27 +24,30 @@ public class Game implements playn.core.Game, DebugRenderer, Renderer, VelocityC
 		ImmediateLayer layer=PlayN.graphics().createImmediateLayer(1024,800, this);
 		PlayN.graphics().rootLayer().add(layer);
 		
+		
 		space.add(new StaticBar(BOUND, 400, 0, 800 - 2 * BOUND));
 		space.add(new StaticBar(1024 - BOUND, 400, 0, 800 - 2 * BOUND));
 		space.add(new StaticBar(1024 / 2, BOUND, 1024 - 2 * BOUND, 0));
 		space.add(new StaticBar(1024 / 2, 800 - BOUND, 1024 - 2 * BOUND, 0));		
 		
-		for(int i=0;i<500;i++){
+		
+		for(int i=0;i<1000;i++){
 			int x=BOUND+STATIC_SIZE/2+(int)(Math.random()*(1024-2*(BOUND+STATIC_SIZE/2)));
 			int y=BOUND+STATIC_SIZE/2+(int)(Math.random()*(800-2*(BOUND+STATIC_SIZE/2)));
 			StaticBar bar = new StaticBar(x, y, STATIC_SIZE*Math.random(), STATIC_SIZE*Math.random());
 			space.add(bar);
 		}
+		
 		space.rebuildStaticIndexes();
 		
 		int i=0;
 		while(i<10000){
-			int x=BOUND+SIZE/2+(int)(Math.random()*(1024-2*(BOUND+SIZE)));
-			int y=BOUND+SIZE/2+(int)(Math.random()*(800-2*(BOUND+SIZE)));
-			double vx=Math.random()*10;
-			double vy=0;//Math.random()*10;
+			int x = BOUND + SIZE + (int) (Math.random() * (1024 - 2 * (BOUND + SIZE)));
+			int y = BOUND + SIZE + (int) (Math.random() * (800 - 2 * (BOUND + SIZE)));
+			double vx = 2 - Math.random() * 4;
+			double vy = 2 - Math.random() * 4;
 
-			DynamicBar bar = new DynamicBar(x, y, 5, 5);
+			DynamicBar bar = new DynamicBar(x, y, SIZE, SIZE);
 			bar.setSpeed(vx, vy);
 			if (!space.cross(bar)) {
 				space.add(bar);

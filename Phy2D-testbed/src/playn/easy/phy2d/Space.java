@@ -32,7 +32,7 @@ public class Space {
 		}
 	}
 	
-	private static double MAX_VELOCITY = 1000f;
+	private static double MAX_VELOCITY = 100000f;
 	//private static double MIN_VELOCITY = 10f;
 	
 	private ArrayList<DynamicBar> dynamicBars = new ArrayList<DynamicBar>();
