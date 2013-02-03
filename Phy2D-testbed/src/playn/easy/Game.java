@@ -15,11 +15,13 @@ public class Game implements playn.core.Game, DebugRenderer, Renderer, VelocityC
 
 	private Space space;
 	private int BOUND = 30;
-	private int SIZE = 6;
+	private int SIZE = 4;
 	private int STATIC_SIZE = 20;	
+	private FPSCounter fps=new FPSCounter();;
 	
 	@Override
 	public void init() {
+		
 		space = new Space(this);
 		ImmediateLayer layer=PlayN.graphics().createImmediateLayer(1024,800, this);
 		PlayN.graphics().rootLayer().add(layer);
@@ -41,7 +43,7 @@ public class Game implements playn.core.Game, DebugRenderer, Renderer, VelocityC
 		space.rebuildStaticIndexes();
 		
 		int i=0;
-		while(i<10000){
+		while(i<1000){
 			int x = BOUND + SIZE + (int) (Math.random() * (1024 - 2 * (BOUND + SIZE)));
 			int y = BOUND + SIZE + (int) (Math.random() * (800 - 2 * (BOUND + SIZE)));
 			double vx = 2 - Math.random() * 4;
@@ -86,6 +88,7 @@ public class Game implements playn.core.Game, DebugRenderer, Renderer, VelocityC
 	
 	@Override
 	public void render(Surface surface) {
+		fps.frame();
 		this.surface=surface;
 		space.render(this);
 	}
