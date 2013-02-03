@@ -22,16 +22,9 @@ public class Game implements playn.core.Game, DebugRenderer, Renderer, VelocityC
 	@Override
 	public void init() {
 		
-		space = new Space(this);
+		space = new Space(1024, 800, this);
 		ImmediateLayer layer=PlayN.graphics().createImmediateLayer(1024,800, this);
 		PlayN.graphics().rootLayer().add(layer);
-		
-		
-		space.add(new StaticBar(BOUND, 400, 0, 800 - 2 * BOUND));
-		space.add(new StaticBar(1024 - BOUND, 400, 0, 800 - 2 * BOUND));
-		space.add(new StaticBar(1024 / 2, BOUND, 1024 - 2 * BOUND, 0));
-		space.add(new StaticBar(1024 / 2, 800 - BOUND, 1024 - 2 * BOUND, 0));		
-		
 		
 		for(int i=0;i<1000;i++){
 			int x=BOUND+STATIC_SIZE/2+(int)(Math.random()*(1024-2*(BOUND+STATIC_SIZE/2)));

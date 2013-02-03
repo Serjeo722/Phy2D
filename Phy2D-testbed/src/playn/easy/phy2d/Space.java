@@ -39,8 +39,17 @@ public class Space {
 	private ArrayList<StaticBar> staticBars = new ArrayList<StaticBar>();
 	private VelocityChanger velocityChanger = null;
 	
-	public Space(VelocityChanger speedChanger){
+	private int width;
+	private int height;
+	public Space(int width, int height, VelocityChanger speedChanger) {
 		this.velocityChanger = speedChanger;
+		
+		this.width = width;
+		this.height = height;
+		add(new StaticBar(0, height / 2, 0, height));
+		add(new StaticBar(width, height / 2, 0, width));
+		add(new StaticBar(width / 2, 0, width, 0));
+		add(new StaticBar(width / 2, height, width, 0));
 	}
 
 	private List<StaticBar> indexStaticBottom;
@@ -87,20 +96,29 @@ public class Space {
 	private int previousStaticChangeN = 0;
 	
 	public void rebuildStaticIndexes(){
-		
-		binaryIndexTop();
-		binaryIndexRight();
-		binaryIndexBottom();
-		binaryIndexLeft();
+		if (previousStaticChangeN != lastStaticChangeN) {
+			binaryIndexTop();
+			binaryIndexRight();
+			binaryIndexBottom();
+			binaryIndexLeft();
+			previousStaticChangeN = lastStaticChangeN;
+		}
+	}
 
-		previousStaticChangeN = lastStaticChangeN;
+	private double dynamicMaxSize = 3;
+	private double dynamicIndexSize = 0;
+	public void rebuildDynamicIndexes(){
+		if (dynamicMaxSize > dynamicIndexSize) {
+			PlayN.log().debug("rebuilding dynamic indexes with grid size="+dynamicMaxSize);
+			dynamicIndexSize=dynamicMaxSize;
+		}
 	}
 	
 	public void step(double delta){
 
 		// rebuild indexes if need
-		if (previousStaticChangeN < lastStaticChangeN) rebuildStaticIndexes();
-		
+		rebuildStaticIndexes();
+		rebuildDynamicIndexes();
 		
 		for(DynamicBar b:dynamicBars){
 			if (velocityChanger != null)
@@ -627,7 +645,7 @@ public class Space {
 				b.y += b.vy;
 			}
 			
-			
+			/*
 			if((b.y+b.h>1024-30*2)&&(b.y+b.h<1024)){
 				PlayN.log().debug("collided="+collided);
 				PlayN.log().debug("Error speed="+b.vy+" by="+b.y+" bh="+b.h+" top="+(b.y+b.h)+" bound="+(1024-30*2));
@@ -635,7 +653,7 @@ public class Space {
 			if(b.y-b.h<30){
 				PlayN.log().debug("collided="+collided);
 				PlayN.log().debug("Error speed="+b.vy+" by="+b.y+" bh="+b.h+" diff="+(b.y-b.h));
-			}
+			}*/
 
 		}
 	}
@@ -659,6 +677,9 @@ public class Space {
 	}
 
 	public void add(DynamicBar bar){
+		dynamicMaxSize = Math.max(bar.w * 2 + 2, dynamicMaxSize);
+		dynamicMaxSize = Math.max(bar.h * 2 + 2, dynamicMaxSize);
+		dynamicMaxSize = Math.floor(dynamicMaxSize);
 		dynamicBars.add(bar);
 	}
 
