@@ -10,11 +10,10 @@ public class Main {
 		
 		SparseIntIntArray<String> table = new SparseIntIntArray<String> ();
 		
-		for(int i=0;i<1000;i++){
+		for (int i = 0; i < 1000; i++) {
 			int x=(int)(10*Math.random());
 			int y=(int)(10*Math.random());
 			table.put(x, y, "["+x+";"+y+"]");
-			
 		}
 		
 		Iterator2d<ArrayList<String>> i = table.iterator2d();

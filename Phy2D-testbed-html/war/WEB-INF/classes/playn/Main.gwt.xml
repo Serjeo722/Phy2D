@@ -1,0 +1,18 @@
+<module rename-to="main">
+	<inherits name='playn.PlayN' />
+
+    <inherits name="playn.logging.Enhanced" />
+    
+    <!-- client side debugging -->
+    <set-property name="log_DivLogger" value="ENABLED" /> 
+    	
+    <inherits name="com.allen_sauer.gwt.log.gwt-log-RemoteLogger" />
+       
+	<source path="core" />
+	<source path="html" />
+	<source path="client" />
+	<source path="easy" />
+	<public path="resources" />
+
+	<entry-point class="playn.client.Main" />
+</module>

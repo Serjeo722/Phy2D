@@ -17,7 +17,7 @@ public class Game implements playn.core.Game, DebugRenderer, Renderer, VelocityC
 	private int BOUND = 30;
 	private int SIZE = 4;
 	private int STATIC_SIZE = 20;	
-	private FPSCounter fps=new FPSCounter();;
+	private FPSCounter fps=new FPSCounter();
 	
 	@Override
 	public void init() {
@@ -26,7 +26,7 @@ public class Game implements playn.core.Game, DebugRenderer, Renderer, VelocityC
 		ImmediateLayer layer=PlayN.graphics().createImmediateLayer(1024,800, this);
 		PlayN.graphics().rootLayer().add(layer);
 		
-		for(int i=0;i<1000;i++){
+		for(int i=0;i<100;i++){
 			int x=BOUND+STATIC_SIZE/2+(int)(Math.random()*(1024-2*(BOUND+STATIC_SIZE/2)));
 			int y=BOUND+STATIC_SIZE/2+(int)(Math.random()*(800-2*(BOUND+STATIC_SIZE/2)));
 			StaticBar bar = new StaticBar(x, y, STATIC_SIZE*Math.random(), STATIC_SIZE*Math.random());

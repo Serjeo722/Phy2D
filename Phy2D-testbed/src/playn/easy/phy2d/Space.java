@@ -39,13 +39,9 @@ public class Space {
 	private ArrayList<StaticBar> staticBars = new ArrayList<StaticBar>();
 	private VelocityChanger velocityChanger = null;
 	
-	private int width;
-	private int height;
 	public Space(int width, int height, VelocityChanger speedChanger) {
 		this.velocityChanger = speedChanger;
 		
-		this.width = width;
-		this.height = height;
 		add(new StaticBar(0, height / 2, 0, height));
 		add(new StaticBar(width, height / 2, 0, width));
 		add(new StaticBar(width / 2, 0, width, 0));
