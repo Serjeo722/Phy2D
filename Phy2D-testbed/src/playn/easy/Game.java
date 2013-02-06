@@ -17,7 +17,7 @@ public class Game implements playn.core.Game, DebugRenderer, Renderer, VelocityC
 	private int BOUND = 30;
 	private int SIZE = 4;
 	private int STATIC_SIZE = 20;	
-	private FPSCounter fps=new FPSCounter();
+	private FPSCounter fps = new FPSCounter();
 	
 	@Override
 	public void init() {
@@ -55,7 +55,9 @@ public class Game implements playn.core.Game, DebugRenderer, Renderer, VelocityC
 
 	@Override
 	public void update(float delta) {
+		fps.update();
 		space.step(delta);
+		fps.endUpdate();
 	}
 
 	@Override
@@ -84,6 +86,7 @@ public class Game implements playn.core.Game, DebugRenderer, Renderer, VelocityC
 		fps.frame();
 		this.surface=surface;
 		space.render(this);
+		fps.endFrame();
 	}
 
 	@Override
