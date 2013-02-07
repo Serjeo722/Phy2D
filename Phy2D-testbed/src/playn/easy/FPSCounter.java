@@ -2,8 +2,6 @@ package playn.easy;
 
 import java.util.Date;
 
-import playn.core.PlayN;
-
 public class FPSCounter {
 
 	private long prevoiusTime = 0;
@@ -31,7 +29,7 @@ public class FPSCounter {
 			currentFPS = frames;
 			frames = 1;
 			prevoiusTime = currentTime;
-			PlayN.log().debug("FPS=" + currentFPS + " Update=" + currentUpdateMs + "ms. Frame=" + currentFrameMs+"ms.");
+			Game.log.message("FPS=" + currentFPS + " Update=" + currentUpdateMs + "ms. Frame=" + currentFrameMs+"ms.");
 		} else
 			frames++;
 	}

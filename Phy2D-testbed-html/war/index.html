@@ -1,11 +1,29 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>PlayN Easy-game</title>
-  </head>
+<head>
+<title>PlayN Easy-game</title>
+</head>
 
-  <body bgcolor="black">
-    <div id="playn-root" style="display: block; margin-left: auto; margin-right: auto;border:1px solid #707070;" />
-    <script src="main/main.nocache.js"></script>
-  </body>
+<SCRIPT language='javascript'>
+window.requestAnimFrame = (function(){
+		return  window.requestAnimationFrame || 
+		  window.webkitRequestAnimationFrame || 
+          window.mozRequestAnimationFrame    || 
+          window.oRequestAnimationFrame      || 
+          window.msRequestAnimationFrame     || 
+          function( callback ){
+            window.setTimeout(callback, 1000 / 60);
+          };
+})();
+ </SCRIPT>
+
+<body>
+	<div id="fps" style="color:#000000"></div>
+	<br>
+	<br>
+	<div id="canvasholder" style="width: 1024px; height: 800px; display: block; margin-left: auto; margin-right: auto; border: 1px solid #707070;"></div>
+	<script src="main/main.nocache.js"></script>
+	<br>
+	<br>
+</body>
 </html>

@@ -28,12 +28,7 @@ public class DynamicBar {
 	}
 
 	public void render(DebugRenderer r) {
-		r.line(x-w, y+h, x+w, y+h, BarType.DYNAMIC);
-		r.line(x-w, y-h, x+w, y-h, BarType.DYNAMIC);
-		r.line(x-w, y+h, x-w, y-h, BarType.DYNAMIC);
-		r.line(x+w, y+h, x+w, y-h, BarType.DYNAMIC);
-
-		//r.line(x, y, x+px, y+py, BarType.RED);
+		r.bar((int)(x-w), (int)(y-h), (int)(2*w), (int)(2*h), BarType.DYNAMIC);
 	}
 	
 	public double path(){
@@ -52,7 +47,7 @@ public class DynamicBar {
 		this.px=new_vx;
 		this.py=new_vy;
 		this.vx=new_vx;
-		this.vy=new_vy/1.3f;
+		this.vy=new_vy/1.05f;
 	}
 
 }

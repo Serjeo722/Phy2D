@@ -4,12 +4,6 @@
 	<classpathentry kind="src" output="test-classes" path="test"/>
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-log-3.1.8.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-voices-2.1.8.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/playn-core-1.5-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/playn-html-1.5-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/playn-webgl-1.5-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/pythagoras-1.3.1.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Phy2D-testbed"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

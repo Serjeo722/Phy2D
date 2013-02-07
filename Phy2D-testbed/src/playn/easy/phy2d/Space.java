@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import playn.core.PlayN;
+import playn.easy.Game;
 
 public class Space {
 
@@ -105,7 +105,7 @@ public class Space {
 	private double dynamicIndexSize = 0;
 	public void rebuildDynamicIndexes(){
 		if (dynamicMaxSize > dynamicIndexSize) {
-			PlayN.log().debug("rebuilding dynamic indexes with grid size="+dynamicMaxSize);
+			Game.log.message("rebuilding dynamic indexes with grid size="+dynamicMaxSize);
 			dynamicIndexSize=dynamicMaxSize;
 		}
 	}
@@ -695,10 +695,7 @@ public class Space {
 		for(DynamicBar bar:dynamicBars) bar.render(render);
 
 		for(StaticBar bar:staticBars){
-			render.line(bar.left, bar.top, bar.right, bar.top, BarType.STATIC);
-			render.line(bar.left, bar.bottom, bar.right, bar.bottom, BarType.STATIC);
-			render.line(bar.left, bar.top, bar.left, bar.bottom, BarType.STATIC);
-			render.line(bar.right, bar.top, bar.right, bar.bottom, BarType.STATIC);
+			render.bar((int)(bar.left), (int)(bar.bottom), (int)(bar.right-bar.left), (int)(bar.top-bar.bottom), BarType.STATIC);
 		}
 	}
 	
